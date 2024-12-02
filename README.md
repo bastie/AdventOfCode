@@ -57,4 +57,3 @@ Zurück zum <strong>free-format</strong>. Alles was wir wissen müssen ist:
 * Mit dem Asterix gefolgt von einem größer als Zeichen `*>` können wir Kommentare in der Zeile einleiten. 
 * COBOL Quelltext ist strukturiert, erst die Daten definieren dann die Algorithmen. 
 
-
