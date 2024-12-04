@@ -1,0 +1,138 @@
+IDENTIFICATION DIVISION.
+PROGRAM-ID. DAY02-PUZZLE1.
+AUTHOR. Sebastian Ritter <bastie@users.noreply.github.com>.
+
+ENVIRONMENT DIVISION.
+  INPUT-OUTPUT SECTION.
+    FILE-CONTROL.
+      SELECT PUZZLE-FILE 
+             ASSIGN TO 'puzzle.am'
+             ORGANIZATION IS SEQUENTIAL
+      .
+
+DATA DIVISION.
+FILE SECTION.
+FD PUZZLE-FILE.
+  01 PUZZLE-CHAR    PIC X.
+    88 PUZZLE-CHAR-IS-M      VALUE "m".
+    88 PUZZLE-CHAR-IS-U      VALUE "u".
+    88 PUZZLE-CHAR-IS-L      VALUE "l".
+    88 PUZZLE-CHAR-IS-OPEN   VALUE "(".
+    88 PUZZLE-CHAR-IS-CLOSE  VALUE ")".
+    88 PUZZLE-CHAR-IS-COMMA  VALUE ",".
+    88 PUZZLE-CHAR-IS-NUMBER VALUE  0 thru 9.
+  01 PUZZLE-CHAR-NUMERIC REDEFINES PUZZLE-CHAR PIC 9.
+
+WORKING-STORAGE SECTION.
+    *> --- Dateisteuerung ---
+    77 FILE-END PIC X VALUE 'Y'.
+    01 FILE-END-FLAG PIC X VALUE LOW-VALUE.
+      88 FILE-END-TRUE VALUE 'Y'.
+    *> --- Businessdaten ---
+
+    77 POSITION-FLAG   PIC X.
+    77 No-01       PIC 9(5).
+    77 No-02       PIC 9(5). 
+
+    77 SUM-OF-MULTIPLY       PIC 999999999999.
+
+*> =============================================== <*
+   PROCEDURE DIVISION.
+*> =============================================== <*
+  MASTER SECTION.
+    
+    OPEN INPUT PUZZLE-FILE
+    
+    PERFORM READ-LOOP UNTIL FILE-END-TRUE
+   
+    DISPLAY "RESULT = " SUM-OF-MULTIPLY
+   
+    CLOSE PUZZLE-FILE
+
+    
+    GOBACK
+    STOP RUN
+  . *>END SECTION
+
+*> ----------------------------------------------- <*
+  READ-LOOP SECTION.
+    READ PUZZLE-FILE
+      AT END 
+        MOVE FILE-END TO FILE-END-FLAG
+      NOT AT END
+        PERFORM HANDLE-CHAR
+  . *>END SECTION
+
+*> ----------------------------------------------- <*
+  HANDLE-CHAR SECTION.
+    EVALUATE TRUE
+      WHEN PUZZLE-CHAR-IS-M
+        PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR *> or new beginning
+        MOVE PUZZLE-CHAR TO POSITION-FLAG
+
+      WHEN PUZZLE-CHAR-IS-U
+        IF POSITION-FLAG = "m" THEN
+          MOVE PUZZLE-CHAR TO POSITION-FLAG
+        ELSE
+          PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR
+        END-IF
+
+      WHEN PUZZLE-CHAR-IS-L
+        IF POSITION-FLAG = "u" THEN
+          MOVE PUZZLE-CHAR TO POSITION-FLAG
+        ELSE
+          PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR
+        END-IF
+
+      WHEN PUZZLE-CHAR-IS-OPEN
+        IF POSITION-FLAG = "l" THEN
+          MOVE PUZZLE-CHAR TO POSITION-FLAG
+        ELSE
+          PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR
+        END-IF
+
+      WHEN PUZZLE-CHAR-IS-CLOSE
+        IF POSITION-FLAG = "2" THEN
+          COMPUTE SUM-OF-MULTIPLY = SUM-OF-MULTIPLY + (No-01 * No-02)
+        END-IF
+        PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR *> or end of parsing is here
+
+      WHEN PUZZLE-CHAR-IS-COMMA
+        IF POSITION-FLAG IS = "1" THEN
+          MOVE PUZZLE-CHAR TO POSITION-FLAG
+        ELSE
+          PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR
+        END-IF
+
+      WHEN PUZZLE-CHAR-IS-NUMBER
+        IF POSITION-FLAG = '(' THEN
+          MOVE "1" TO POSITION-FLAG
+          MOVE PUZZLE-CHAR-NUMERIC TO No-01
+        ELSE 
+          IF POSITION-FLAG = "1" THEN
+            COMPUTE No-01 = No-01 * 10 + PUZZLE-CHAR-NUMERIC
+          ELSE 
+            IF POSITION-FLAG = "2" THEN
+              COMPUTE No-02 = No-02 * 10 + PUZZLE-CHAR-NUMERIC
+            ELSE
+              IF POSITION-FLAG = "," THEN
+                MOVE "2" TO POSITION-FLAG
+                MOVE PUZZLE-CHAR-NUMERIC TO No-02
+              ELSE
+                PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR
+              END-IF
+            END-IF
+          END-IF
+        END-IF
+      WHEN OTHER
+        PERFORM ROLLBACK-BECAUSE-ILLEGAL-CHAR
+    END-EVALUATE
+  . *>END SECTION
+
+*> ---------------------------------------------- <*
+  ROLLBACK-BECAUSE-ILLEGAL-CHAR SECTION.
+    MOVE ZERO TO No-01
+    MOVE ZERO TO No-02
+    MOVE ZERO TO POSITION-FLAG
+  . *> END SECTION.
+*> === EOF ======================================= <*

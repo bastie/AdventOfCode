@@ -1,6 +1,6 @@
 # Advent of COBOL - Tag 1
 
-Der Rätseltext ist des [Advent of Code, Tag 1](https://adventofcode.com/2024/day/1) hat auch dieses Jahr wieder zwei Aufgaben für uns. Diese Seite gibt nur die eigentlichen Lösungswege nicht die schöne Geschichte dahinter wieder.
+Der Rätseltext des [Advent of Code, Tag 1](https://adventofcode.com/2024/day/1) hat auch dieses Jahr wieder zwei Aufgaben für uns. Diese Seite gibt nur die eigentlichen Lösungswege nicht die schöne Geschichte dahinter wieder.
 
 ## Vormittag
 
